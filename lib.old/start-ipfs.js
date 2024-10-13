@@ -64,6 +64,13 @@ const startIpfs = async () => {
     hideWindows: true,
   })
 
+  // expose routing api
+  console.log([ipfsPath, 'config', '--json', 'Gateway.ExposeRoutingAPI', 'true'].join(' '))
+  await spawnAsync(ipfsPath, ['config', '--json', 'Gateway.ExposeRoutingAPI', 'true'], {
+    env,
+    hideWindows: true,
+  })
+
   await new Promise((resolve, reject) => {
     const ipfsProcess = spawn(
       ipfsPath,

@@ -74,12 +74,12 @@ while (!monitorState.subplebbitsMonitoring) {
 }
 
 // fetch subplebbits ipns every 10min
-monitorSubplebbitsIpns().catch(e => console.log(e.message))
-setInterval(() => monitorSubplebbitsIpns().catch(e => console.log(e.message)), subplebbitsIpnsIntervalMs)
+// monitorSubplebbitsIpns().catch(e => console.log(e.message))
+// setInterval(() => monitorSubplebbitsIpns().catch(e => console.log(e.message)), subplebbitsIpnsIntervalMs)
 
 // rejoin pubsub every 10min
-setTimeout(() => monitorSubplebbitsPubsub().catch(e => console.log(e.message)), 1000 * 60) // wait for some pubsub topics to be fetched
-setInterval(() => monitorSubplebbitsPubsub().catch(e => console.log(e.message)), subplebbitsPubsubIntervalMs)
+// setTimeout(() => monitorSubplebbitsPubsub().catch(e => console.log(e.message)), 1000 * 60) // wait for some pubsub topics to be fetched
+// setInterval(() => monitorSubplebbitsPubsub().catch(e => console.log(e.message)), subplebbitsPubsubIntervalMs)
 
 // fetch gateways every 10min
 monitorIpfsGateways().catch(e => console.log(e.message))
@@ -168,6 +168,25 @@ app.get('/history', async (req, res) => {
     res.status(404)
     res.send(e.message)
   }
+})
+
+// prometheus endpoint
+import {promClient} from './lib/prometheus.js'
+app.get('/metrics/prometheus', async (req, res) => {
+  try {
+    const metricsResponse = await promClient.register.metrics()
+    res.writeHead(200, {
+      'Content-Type': 'text/plain; charset=utf-8'
+    })
+    res.write(metricsResponse)    
+  }
+  catch (e) {
+    res.writeHead(404, {
+      'Content-Type': 'text/plain; charset=utf-8'
+    })
+    res.write(e.message)   
+  }
+  res.end()
 })
 
 // save history every 1min
