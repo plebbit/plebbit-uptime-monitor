@@ -74,8 +74,8 @@ while (!monitorState.subplebbitsMonitoring) {
 }
 
 // fetch subplebbits ipns every 10min
-// monitorSubplebbitsIpns().catch(e => console.log(e.message))
-// setInterval(() => monitorSubplebbitsIpns().catch(e => console.log(e.message)), subplebbitsIpnsIntervalMs)
+monitorSubplebbitsIpns().catch(e => console.log(e.message))
+setInterval(() => monitorSubplebbitsIpns().catch(e => console.log(e.message)), subplebbitsIpnsIntervalMs)
 
 // rejoin pubsub every 10min
 // setTimeout(() => monitorSubplebbitsPubsub().catch(e => console.log(e.message)), 1000 * 60) // wait for some pubsub topics to be fetched
