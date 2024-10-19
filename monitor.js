@@ -90,6 +90,7 @@ import express from 'express'
 const app = express()
 app.listen(apiPort)
 app.get('/', (req, res) => {
+  const plebbit = {subplebbitsStats: {}, subplebbitCount: 0}
   const subplebbits = {}
   for (const subplebbitAddress in monitorState.subplebbits) {
     subplebbits[subplebbitAddress] = {
@@ -98,6 +99,16 @@ app.get('/', (req, res) => {
       lastSubplebbitPubsubMessageTimetamp: monitorState.subplebbits[subplebbitAddress].lastSubplebbitPubsubMessageTimetamp,
       pubsubDhtPeers: monitorState.subplebbits[subplebbitAddress].pubsubDhtPeers?.length,
       pubsubPeers: monitorState.subplebbits[subplebbitAddress].pubsubPeers?.length,
+      subplebbitStats: monitorState.subplebbits[subplebbitAddress].subplebbitStats
+    }
+
+    // add subplebbits stats to plebbit
+    plebbit.subplebbitCount++
+    for (const statsName in monitorState.subplebbits[subplebbitAddress].subplebbitStats) {
+      if (!plebbit.subplebbitsStats[statsName]) {
+        plebbit.subplebbitsStats[statsName] = 0
+      }
+      plebbit.subplebbitsStats[statsName] += monitorState.subplebbits[subplebbitAddress].subplebbitStats[statsName]
     }
   }
   const ipfsGateways = {}
@@ -107,7 +118,8 @@ app.get('/', (req, res) => {
       ...monitorState.ipfsGateways[ipfsGatewayUrl]?.[monitorState.ipfsGateways[ipfsGatewayUrl].length - 1]
     }
   }
-  const jsonResponse = JSON.stringify({subplebbits, ipfsGateways}, null, 2)
+
+  const jsonResponse = JSON.stringify({subplebbits, ipfsGateways, plebbit}, null, 2)
   res.setHeader('Content-Type', 'application/json')
   // cache expires after 1 minutes (60 seconds), must revalidate if expired
   res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate')
@@ -143,9 +155,22 @@ app.get('/history', async (req, res) => {
     const to = req.query.to ? new Date(req.query.to).getTime() : Infinity
     const ipfsGatewayUrl = req.query.ipfsGatewayUrl
     const subplebbitAddress = req.query.subplebbitAddress
+    const include = req.query.include?.split(',')
+    const interval = req.query.interval
     const filteredHistory = []
+    let previousTimestamp
     for (const [timestamp, stats] of history) {
       if (timestamp >= from && timestamp <= to) {
+        // interval size
+        if (previousTimestamp && interval) {
+          const time = timestamp - previousTimestamp
+          if (time < interval) {
+            continue
+          }
+        }
+        previousTimestamp = timestamp
+
+        // filters
         let filteredStats
         if (ipfsGatewayUrl) {
           filteredStats = {...filteredStats, ipfsGateways: {[ipfsGatewayUrl]: stats.ipfsGateways[ipfsGatewayUrl]}}
@@ -155,6 +180,15 @@ app.get('/history', async (req, res) => {
         }
         if (!filteredStats) {
           filteredStats = stats
+        }
+
+        // include
+        if (include?.length) {
+          for (const propName in filteredStats) {
+            if (!include.includes(propName)) {
+              delete filteredStats[propName]
+            }
+          }
         }
         filteredHistory.push([timestamp, filteredStats])
       }
