@@ -193,7 +193,7 @@ app.get('/history', async (req, res) => {
         }
         filteredHistory.push([timestamp, filteredStats])
         if (filteredHistory.length > maxTimestamps) {
-          throw Error(`too many results, add to=<timestamp-seconds>, from=<timestamp-seconds> and/or interval=<seconds> to your query`)
+          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-seconds, from=timestamp-seconds and/or interval=seconds to your query`)
         }
       }
     }
