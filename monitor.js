@@ -147,6 +147,7 @@ updateHistory().catch(e => console.log(e.message))
 setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 * 5)
 
 // history endpoint
+let maxTimestamps = 500
 app.get('/history', async (req, res) => {
   // cache expires after 10 minutes (600 seconds), must revalidate if expired
   res.setHeader('Cache-Control', 'public, max-age=600, must-revalidate')
@@ -191,6 +192,9 @@ app.get('/history', async (req, res) => {
           }
         }
         filteredHistory.push([timestamp, filteredStats])
+        if (filteredHistory.length > maxTimestamps) {
+          throw Error(`too many results, add to=<timestamp-seconds>, from=<timestamp-seconds> and/or interval=<seconds> to your query`)
+        }
       }
     }
     const jsonResponse = JSON.stringify(filteredHistory)
