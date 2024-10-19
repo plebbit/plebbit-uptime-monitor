@@ -127,21 +127,10 @@ app.get('/', (req, res) => {
 })
 
 // update history every 5 min
-let history = []
+let historyFiles = []
 const updateHistory = async () => {
-  const _history = []
   await fs.ensureDir('history')
-  const files = await fs.readdir('history')
-  for (const file of files) {
-    try {
-      const stats = JSON.parse(await fs.readFile(`history/${file}`, 'utf8'))
-      _history.push([Math.round(new Date(file).getTime() / 1000), stats])
-    }
-    catch (e) {
-      console.log(e)
-    }
-  }
-  history = _history
+  historyFiles = await fs.readdir('history')
 }
 updateHistory().catch(e => console.log(e.message))
 setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 * 5)
@@ -160,7 +149,8 @@ app.get('/history', async (req, res) => {
     const interval = req.query.interval
     const filteredHistory = []
     let previousTimestamp
-    for (const [timestamp, stats] of history) {
+    for (const historyFile of historyFiles) {
+      const timestamp = Math.round(new Date(historyFile).getTime() / 1000)
       if (timestamp >= from && timestamp <= to) {
         // interval size
         if (previousTimestamp && interval) {
@@ -170,6 +160,8 @@ app.get('/history', async (req, res) => {
           }
         }
         previousTimestamp = timestamp
+
+        const stats = JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))
 
         // filters
         let filteredStats
