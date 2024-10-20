@@ -164,16 +164,16 @@ app.get('/history', async (req, res) => {
   }
 
   try {
-    const from = req.query.from ? new Date(req.query.from).getTime() : 0
-    const to = req.query.to ? new Date(req.query.to).getTime() : Infinity
+    const from = req.query.from ? new Date(req.query.from).getTime() : 0 // in ms or date string
+    const to = req.query.to ? new Date(req.query.to).getTime() : Infinity // in ms or date string
     const ipfsGatewayUrl = req.query.ipfsGatewayUrl
     const subplebbitAddress = req.query.subplebbitAddress
     const include = req.query.include?.split(',')
-    const interval = req.query.interval
+    const interval = req.query.interval // in seconds
     const filteredHistory = []
     let previousTimestamp
     for (const historyFile of historyFiles) {
-      const timestamp = Math.round(new Date(historyFile).getTime() / 1000)
+      const timestamp = new Date(historyFile).getTime()
       if (timestamp >= from && timestamp <= to) {
         // interval size
         if (previousTimestamp && interval) {
@@ -208,7 +208,7 @@ app.get('/history', async (req, res) => {
         }
         filteredHistory.push([timestamp, filteredStats])
         if (filteredHistory.length > maxTimestamps) {
-          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-seconds, from=timestamp-seconds and/or interval=seconds to your query`)
+          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=seconds to your query`)
         }
       }
     }
