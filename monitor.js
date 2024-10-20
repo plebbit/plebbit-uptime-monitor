@@ -127,19 +127,41 @@ app.get('/', (req, res) => {
 })
 
 // update history every 5 min
+const maxTimestamps = 500
 let historyFiles = []
+let historyRecentCache = {}
 const updateHistory = async () => {
   await fs.ensureDir('history')
   historyFiles = await fs.readdir('history')
+
+  // add recent cache for faster loading
+  const _historyRecentCache = {}
+  let cacheCount = 0
+  while (cacheCount++ < maxTimestamps) {
+    const historyFilesIndex = historyFiles.length - cacheCount
+    if (historyFilesIndex < 0) {
+      break
+    }
+    const historyFile = historyFiles[historyFilesIndex]
+    _historyRecentCache[historyFile] = JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))  
+  }
+  historyRecentCache = _historyRecentCache
 }
 updateHistory().catch(e => console.log(e.message))
 setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 * 5)
 
 // history endpoint
-let maxTimestamps = 500
 app.get('/history', async (req, res) => {
-  // cache expires after 10 minutes (600 seconds), must revalidate if expired
-  res.setHeader('Cache-Control', 'public, max-age=600, must-revalidate')
+  const isPastAndImmutable = req.query.to ? Date.now() > new Date(req.query.to).getTime() : false
+  if (isPastAndImmutable) {
+    // if query has a 'to' timestamp, it is in the past, it can never update and is immutable
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+  }
+  else {
+    // cache expires after 10 minutes (600 seconds), must revalidate if expired
+    res.setHeader('Cache-Control', 'public, max-age=600, must-revalidate')
+  }
+
   try {
     const from = req.query.from ? new Date(req.query.from).getTime() : 0
     const to = req.query.to ? new Date(req.query.to).getTime() : Infinity
@@ -154,14 +176,14 @@ app.get('/history', async (req, res) => {
       if (timestamp >= from && timestamp <= to) {
         // interval size
         if (previousTimestamp && interval) {
-          const time = timestamp - previousTimestamp
-          if (time < interval) {
+          const previousTimestampInterval = timestamp - previousTimestamp
+          if (previousTimestampInterval < interval) {
             continue
           }
         }
         previousTimestamp = timestamp
 
-        const stats = JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))
+        const stats = historyRecentCache[historyFile] || JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))
 
         // filters
         let filteredStats
