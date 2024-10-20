@@ -151,9 +151,21 @@ updateHistory().catch(e => console.log(e.message))
 setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 * 5)
 
 // history endpoint
+const toDate = (dateString) => {
+  try {
+    if (isFinite(dateString)) {
+      return new Date(dateString * 1000)
+    }
+    return new Date(dateString)
+  }
+  catch (e) {
+    console.log(e)
+  }
+  return new Date()
+}
 app.get('/history', async (req, res) => {
   console.log(req.method, req.url, req.query)
-  const isPastAndImmutable = req.query.to ? Date.now() > new Date(req.query.to).getTime() : false
+  const isPastAndImmutable = req.query.to ? Date.now() > toDate(req.query.to).getTime() : false
   if (isPastAndImmutable) {
     // if query has a 'to' timestamp, it is in the past, it can never update and is immutable
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
@@ -164,8 +176,8 @@ app.get('/history', async (req, res) => {
   }
 
   try {
-    const from = req.query.from ? new Date(req.query.from).getTime() : 0 // in ms or date string
-    const to = req.query.to ? new Date(req.query.to).getTime() : Infinity // in ms or date string
+    const from = req.query.from ? toDate(req.query.from).getTime() : 0 // in seconds
+    const to = req.query.to ? toDate(req.query.to).getTime() : Infinity // in seconds
     const ipfsGatewayUrl = req.query.ipfsGatewayUrl
     const subplebbitAddress = req.query.subplebbitAddress
     const include = req.query.include?.split(',')
@@ -175,19 +187,19 @@ app.get('/history', async (req, res) => {
     const historyFilesToRead = []
     let previousTimestamp
     for (const historyFile of historyFiles) {
-      const timestamp = new Date(historyFile).getTime()
+      const timestamp = toDate(historyFile).getTime()
       if (timestamp >= from && timestamp <= to) {
         // interval size
         if (previousTimestamp && interval) {
           const previousTimestampInterval = timestamp - previousTimestamp
-          if (previousTimestampInterval < interval) {
+          if (previousTimestampInterval < interval * 1000) {
             continue
           }
         }
         previousTimestamp = timestamp
         historyFilesToRead.push(historyFile)
         if (historyFilesToRead.length > maxTimestamps) {
-          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=ms to your query`)
+          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-seconds, from=timestamp-seconds and/or interval=seconds to your query`)
         }
       }
     }
@@ -219,7 +231,7 @@ app.get('/history', async (req, res) => {
           }
         }
 
-        const timestamp = new Date(historyFile).getTime()
+        const timestamp = Math.round(toDate(historyFile).getTime() / 1000)
         return [timestamp, filteredStats]
       }
       promises.push(getTimestampAndStats())
