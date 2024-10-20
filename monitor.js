@@ -178,7 +178,7 @@ app.get('/history', async (req, res) => {
       const timestamp = new Date(historyFile).getTime()
       if (timestamp >= from && timestamp <= to) {
         // interval size
-        if (previousTimestamp && interval) {
+        if (previousTimestamp && interval * 1000) {
           const previousTimestampInterval = timestamp - previousTimestamp
           if (previousTimestampInterval < interval) {
             continue
