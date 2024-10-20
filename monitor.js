@@ -180,14 +180,14 @@ app.get('/history', async (req, res) => {
         // interval size
         if (previousTimestamp && interval) {
           const previousTimestampInterval = timestamp - previousTimestamp
-          if (previousTimestampInterval < interval * 1000) {
+          if (previousTimestampInterval < interval) {
             continue
           }
         }
         previousTimestamp = timestamp
         historyFilesToRead.push(historyFile)
         if (historyFilesToRead.length > maxTimestamps) {
-          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=seconds to your query`)
+          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=ms to your query`)
         }
       }
     }
