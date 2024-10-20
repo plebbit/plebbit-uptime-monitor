@@ -193,7 +193,7 @@ app.get('/history', async (req, res) => {
     }
 
     // filter by url query params
-    const filteredHistory = []
+    const promises = []
     for (const historyFile of historyFilesToRead) {
       const getTimestampAndStats = async () => {
         const stats = historyRecentCache[historyFile] || JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))
@@ -222,9 +222,9 @@ app.get('/history', async (req, res) => {
         const timestamp = new Date(historyFile).getTime()
         return [timestamp, filteredStats]
       }
-      filteredHistory.push(getTimestampAndStats())
+      promises.push(getTimestampAndStats())
     }
-    await Promise.all(filteredHistory)
+    const filteredHistory = await Promise.all(promises)
 
     const jsonResponse = JSON.stringify(filteredHistory)
     res.setHeader('Content-Type', 'application/json')
