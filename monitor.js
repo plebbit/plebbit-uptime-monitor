@@ -170,7 +170,9 @@ app.get('/history', async (req, res) => {
     const subplebbitAddress = req.query.subplebbitAddress
     const include = req.query.include?.split(',')
     const interval = req.query.interval // in seconds
-    const filteredHistory = []
+
+    // filter by timestamp
+    const historyFilesToRead = []
     let previousTimestamp
     for (const historyFile of historyFiles) {
       const timestamp = new Date(historyFile).getTime()
@@ -183,7 +185,17 @@ app.get('/history', async (req, res) => {
           }
         }
         previousTimestamp = timestamp
+        historyFilesToRead.push(historyFile)
+        if (historyFilesToRead.length > maxTimestamps) {
+          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=seconds to your query`)
+        }
+      }
+    }
 
+    // filter by url query params
+    const filteredHistory = []
+    for (const historyFile of historyFilesToRead) {
+      const getTimestampAndStats = async () => {
         const stats = historyRecentCache[historyFile] || JSON.parse(await fs.readFile(`history/${historyFile}`, 'utf8'))
 
         // filters
@@ -206,12 +218,14 @@ app.get('/history', async (req, res) => {
             }
           }
         }
-        filteredHistory.push([timestamp, filteredStats])
-        if (filteredHistory.length > maxTimestamps) {
-          throw Error(`too many results (more than ${maxTimestamps}), add to=timestamp-ms, from=timestamp-ms and/or interval=seconds to your query`)
-        }
+
+        const timestamp = new Date(historyFile).getTime()
+        return [timestamp, filteredStats]
       }
+      filteredHistory.push(getTimestampAndStats())
     }
+    await Promise.all(filteredHistory)
+
     const jsonResponse = JSON.stringify(filteredHistory)
     res.setHeader('Content-Type', 'application/json')
     res.send(jsonResponse)
