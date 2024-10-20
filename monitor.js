@@ -153,6 +153,8 @@ setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 
 // history endpoint
 const toDate = (dateString) => {
   try {
+    // all number timestamps in and out, should be in seconds
+    // but internally I keep them in ms most of the time
     if (isFinite(dateString)) {
       return new Date(dateString * 1000)
     }
