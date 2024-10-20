@@ -152,7 +152,7 @@ setInterval(() => updateHistory().catch(e => console.log(e.message)), 1000 * 60 
 
 // history endpoint
 app.get('/history', async (req, res) => {
-  console.log(req.method, req.url)
+  console.log(req.method, req.url, req.query)
   const isPastAndImmutable = req.query.to ? Date.now() > new Date(req.query.to).getTime() : false
   if (isPastAndImmutable) {
     // if query has a 'to' timestamp, it is in the past, it can never update and is immutable
