@@ -14,7 +14,7 @@ const basicAuthUsername = process.env.IPFS_BASIC_AUTH_USERNAME
 const basicAuthPassword = process.env.IPFS_BASIC_AUTH_PASSWORD
 const ipfsGatewayPort = 8080
 const ipfsApiPort = 5001
-const ipfsClientVersion = '0.32.0'
+const ipfsClientVersion = '0.32.1'
 let ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-amd64.tar.gz`
 if (process.platform === 'win32') {
   ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_windows-amd64.zip`
