@@ -16,6 +16,7 @@ if [ -z "${DEPLOY_HOST+xxx}" ]; then echo "DEPLOY_HOST not set" && exit; fi
 if [ -z "${DEPLOY_USER+xxx}" ]; then echo "DEPLOY_USER not set" && exit; fi
 if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit; fi
 
+# NOTE: DON'T DELETE THE REPO, it contains historical data in ./history and ./monitorState.json
 SCRIPT="
 cd /home
 git clone https://github.com/plebbit/plebbit-uptime-monitor.git
