@@ -9,20 +9,31 @@ import decompress from 'decompress'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import tcpPortUsed from 'tcp-port-used'
+import {arch} from 'os'
 
 const basicAuthUsername = process.env.IPFS_BASIC_AUTH_USERNAME
 const basicAuthPassword = process.env.IPFS_BASIC_AUTH_PASSWORD
+
 const ipfsGatewayPort = 8080
 const ipfsApiPort = 5001
 const ipfsClientVersion = '0.32.1'
-let ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-amd64.tar.gz`
-if (process.platform === 'win32') {
-  ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_windows-amd64.zip`
-}
-if (process.platform === 'darwin') {
-  ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_darwin-amd64.tar.gz`
-}
 
+const architecture = arch()
+let ipfsClientArchitecture
+if (architecture === 'ia32') {
+  ipfsClientArchitecture = '386'
+} else if (architecture === 'x64') {
+  ipfsClientArchitecture = 'amd64'
+} else if (architecture === 'arm64') {
+  ipfsClientArchitecture = 'arm64'
+} else if (architecture === 'arm') {
+  ipfsClientArchitecture = 'arm'
+} else {
+  throw Error(`ipfs doesn't support architecture '${architecture}'`)
+}
+const ipfsClientOs = process.platform === 'win32' ? 'windows' : process.platform
+const ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_${ipfsClientOs}-${ipfsClientArchitecture}.tar.gz`
+console.log({ipfsClientUrl})
 const downloadWithProgress = (url) =>
   new Promise((resolve) => {
     const split = url.split('/')
