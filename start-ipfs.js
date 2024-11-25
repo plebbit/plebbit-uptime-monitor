@@ -33,7 +33,7 @@ if (architecture === 'ia32') {
 }
 const ipfsClientOs = process.platform === 'win32' ? 'windows' : process.platform
 const ipfsClientUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_${ipfsClientOs}-${ipfsClientArchitecture}.tar.gz`
-console.log({ipfsClientUrl})
+
 const downloadWithProgress = (url) =>
   new Promise((resolve) => {
     const split = url.split('/')
