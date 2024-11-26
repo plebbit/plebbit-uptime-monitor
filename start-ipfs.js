@@ -18,6 +18,14 @@ const ipfsGatewayPort = 8080
 const ipfsApiPort = 5001
 const ipfsClientVersion = '0.32.1'
 
+// list of http routers to use
+const envHttpRouterUrls = process.env.HTTP_ROUTER_URLS ? process.env.HTTP_ROUTER_URLS.split(',').map(url => url.trim()) : []
+const httpRouterUrls = [
+  'https://routing.lol',
+  'https://peers.pleb.bot',
+  ...envHttpRouterUrls,
+]
+
 const architecture = arch()
 let ipfsClientArchitecture
 if (architecture === 'ia32') {
@@ -136,15 +144,49 @@ const startIpfs = async () => {
     await spawnAsync(ipfsPath, ['repo', 'migrate'], {env, hideWindows: true})
   } catch (e) {}
 
-  // dont use 8080 port because it's too common
-  await spawnAsync(ipfsPath, ['config', '--json', 'Addresses.Gateway', '"/ip4/127.0.0.1/tcp/6473"'], {
+  // set gateway port
+  await spawnAsync(ipfsPath, ['config', '--json', 'Addresses.Gateway', `"/ip4/127.0.0.1/tcp/${ipfsGatewayPort}"`], {
     env,
     hideWindows: true,
   })
 
-  // use different port with proxy for debugging during env
-  let apiAddress = '/ip4/127.0.0.1/tcp/5001'
-  await spawnAsync(ipfsPath, ['config', 'Addresses.API', apiAddress], {env, hideWindows: true})
+  // set api port
+  await spawnAsync(ipfsPath, ['config', 'Addresses.API', `/ip4/127.0.0.1/tcp/${ipfsApiPort}`], {env, hideWindows: true})
+
+  // create http routers config
+  const httpRoutersConfig = {
+    HttpRoutersParallel: {Type: 'parallel', Parameters: {Routers: []}},
+    HttpRouterNotSupported: {Type: 'http', Parameters: {Endpoint: 'http://kubonotsupported'}}
+  }
+  for (const [i, httpRouterUrl] of httpRouterUrls.entries()) {
+    const RouterName = `HttpRouter${i+1}`
+    httpRoutersConfig[RouterName] = {Type: 'http', Parameters: {
+      Endpoint: httpRouterUrl,
+      // MaxProvideBatchSize: 1000, // default 100
+      // MaxProvideConcurrency: 1 // default GOMAXPROCS
+    }}
+    httpRoutersConfig.HttpRoutersParallel.Parameters.Routers[i] = {
+      RouterName: RouterName,
+      IgnoreErrors : true, // If any of the routers fails, the output will be an error by default. To avoid any error at the output, you must ignore all router errors.
+      Timeout: '10s'
+    }
+  }
+
+  const httpRoutersMethodsConfig = {
+    'find-providers': {RouterName: 'HttpRoutersParallel'},
+    provide: {RouterName: 'HttpRoutersParallel'},
+    // not supported by plebbit trackers
+    'find-peers': {RouterName: 'HttpRouterNotSupported'},
+    'get-ipns': {RouterName: 'HttpRouterNotSupported'},
+    'put-ipns': {RouterName: 'HttpRouterNotSupported'}
+  }
+  await spawnAsync(ipfsPath, ['config', 'Routing.Type', 'custom'], {env, hideWindows: true})
+  await spawnAsync(ipfsPath, ['config', '--json', 'Routing.Routers', JSON.stringify(httpRoutersConfig)], {env, hideWindows: true})
+  await spawnAsync(ipfsPath, ['config', '--json', 'Routing.Methods', JSON.stringify(httpRoutersMethodsConfig)], {env, hideWindows: true})
+
+  // debug
+  await spawnAsync(ipfsPath, ['config', 'show'], {env, hideWindows: true})
+  await spawnAsync(ipfsPath, ['id'], {env, hideWindows: true})
 
   await new Promise((resolve, reject) => {
     const ipfsProcess = spawn(ipfsPath, ['daemon', '--migrate', '--enable-pubsub-experiment', '--enable-namesys-pubsub'], {env, hideWindows: true})
@@ -184,7 +226,7 @@ const start = async () => {
   }
   pendingStart = true
   try {
-    const started = await tcpPortUsed.check(5001, '127.0.0.1')
+    const started = await tcpPortUsed.check(ipfsApiPort, '127.0.0.1')
     if (started) {
       return
     }
