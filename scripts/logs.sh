@@ -20,5 +20,16 @@ SCRIPT="
 docker logs --follow plebbit-uptime-monitor
 "
 
+# only include logs that contain the filter, e.g. `scripts/logs.sh plebbit-uptime-monitor:subplebbit-pubsub`
+filter="$1"
+if [ -z "$filter" ]; then
+  :
+else
+  SCRIPT="
+docker logs --follow plebbit-uptime-monitor 2>&1 | grep '$filter' | sed 's/$filter//g'
+"
+  echo $SCRIPT
+fi
+
 # execute script over ssh
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"
