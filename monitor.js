@@ -8,6 +8,8 @@ const argv = yargs(hideBin(process.argv)).argv
 console.log({argv})
 import fs from 'fs-extra'
 import fetch from 'node-fetch'
+import Debug from 'debug'
+Debug.enable('plebbit-uptime-monitor:*')
 
 import {fetchMultisubUrl} from './lib/utils.js'
 import config from './config.js'
