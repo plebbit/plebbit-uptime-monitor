@@ -27,6 +27,7 @@
     "http-proxy": "1.18.1",
     "https-proxy-agent": "7.0.4",
     "javascript-time-ago": "2.5.10",
+    "kubo-rpc-client": "5.0.2",
     "node-fetch": "2.6.7",
     "p-queue": "8.0.1",
     "p-timeout": "6.1.3",
