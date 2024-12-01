@@ -16,6 +16,6 @@ docker run \
   --workdir="/usr/src/plebbit-uptime-monitor" \
   --publish 80:3000 \
   node:18 \
-  sh -c "npm install && npm start -- $MONITOR_ARGS"
+  sh -c "npm install; npm start -- $MONITOR_ARGS"
 
 docker logs --follow plebbit-uptime-monitor
