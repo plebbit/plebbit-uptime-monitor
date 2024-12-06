@@ -290,6 +290,12 @@ const startServer = (port) => {
     // start of pubsub related endpoints
     console.log(req.method, req.url, req.rawHeaders)
 
+    // don't let plebbit-js call shutdown
+    if (req.url === '/api/v0/shutdown') {
+      res.end()
+      return
+    }
+
     // basic auth allows any api
     let reqHasBasicAuth = false
     const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
