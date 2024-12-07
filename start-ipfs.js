@@ -188,7 +188,7 @@ const startIpfs = async () => {
   await spawnAsync(ipfsPath, ['config', 'show'], {env, hideWindows: true})
   await spawnAsync(ipfsPath, ['id'], {env, hideWindows: true})
 
-  await new Promise((resolve, reject) => {
+  const startIpfsDaemon = () => new Promise((resolve, reject) => {
     const ipfsProcess = spawn(ipfsPath, ['daemon', '--migrate', '--enable-pubsub-experiment', '--enable-namesys-pubsub'], {env, hideWindows: true})
     console.log(`ipfs daemon process started with pid ${ipfsProcess.pid}`)
     let lastError
@@ -197,7 +197,13 @@ const startIpfs = async () => {
       console.error(data.toString())
     })
     ipfsProcess.stdin.on('data', (data) => console.log(data.toString()))
-    ipfsProcess.stdout.on('data', (data) => console.log(data.toString()))
+    ipfsProcess.stdout.on('data', (data) => {
+      data = data.toString()
+      console.log(data)
+      if (data.includes('Daemon is ready')) {
+        resolve()
+      }
+    })
     ipfsProcess.on('error', (data) => console.error(data.toString()))
     ipfsProcess.on('exit', () => {
       console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
@@ -217,6 +223,7 @@ const startIpfs = async () => {
       }
     })
   })
+  await startIpfsDaemon()
 }
 
 let pendingStart = false
