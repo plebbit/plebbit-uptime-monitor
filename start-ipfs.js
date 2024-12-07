@@ -226,30 +226,32 @@ const startIpfs = async () => {
   await startIpfsDaemon()
 }
 
-let pendingStart = false
-const start = async () => {
-  if (pendingStart) {
-    return
-  }
-  pendingStart = true
-  try {
-    const started = await tcpPortUsed.check(ipfsApiPort, '127.0.0.1')
-    if (started) {
+const startIpfsAutoRestart = async () => {
+  let pendingStart = false
+  const start = async () => {
+    if (pendingStart) {
       return
     }
-    await startIpfs()
-  } catch (e) {
-    console.log('failed starting ipfs', e)
+    pendingStart = true
+    try {
+      const started = await tcpPortUsed.check(5001, '127.0.0.1')
+      if (!started) {
+        await startIpfs()
+      }
+    } catch (e) {
+      console.log('failed starting ipfs', e)
+    }
+    pendingStart = false
   }
-  pendingStart = false
-}
 
-// retry starting ipfs every 1 second,
-// in case it was started by another client that shut down and shut down ipfs with it
-start()
-setInterval(() => {
+  // retry starting ipfs every 1 second,
+  // in case it was started by another client that shut down and shut down ipfs with it
   start()
-}, 1000)
+  setInterval(() => {
+    start()
+  }, 1000)
+}
+startIpfsAutoRestart()
 
 // start proxy
 const proxy = httpProxy.createProxyServer({})
