@@ -27,7 +27,7 @@ if [ -z "$filter" ]; then
   :
 else
   SCRIPT="
-docker logs plebbit-uptime-monitor 2>&1 | grep '$filter'
+docker logs --tail 1000 plebbit-uptime-monitor 2>&1 | grep '$filter'
 "
   echo $SCRIPT
 fi

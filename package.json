@@ -25,6 +25,7 @@
     "express": "4.19.2",
     "fs-extra": "11.1.0",
     "http-proxy": "1.18.1",
+    "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.4",
     "javascript-time-ago": "2.5.10",
     "kubo-rpc-client": "5.0.2",

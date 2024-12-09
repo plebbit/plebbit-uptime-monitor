@@ -1,5 +1,5 @@
 import util from 'util'
-// util.inspect.defaultOptions.depth = process.env.DEBUG_DEPTH
+util.inspect.defaultOptions.depth = process.env.DEBUG_DEPTH
 import dotenv from 'dotenv'
 dotenv.config()
 import yargs from 'yargs/yargs'
