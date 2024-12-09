@@ -6,7 +6,8 @@ history
 stats-telegram-last-message-id
 .ipfs
 .deploy-env
-.ipfs-deploy-env
+.deploy-env-ipfs
+.deploy-env-ipfs-pubsub
 bin
 config.js
 
