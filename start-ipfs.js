@@ -301,8 +301,8 @@ const startServer = (port) => {
     // start of pubsub related endpoints
     console.log(req.method, req.url, req.rawHeaders)
 
-    // don't let plebbit-js call shutdown
-    if (req.url === '/api/v0/shutdown') {
+    // don't let plebbit-js call shutdown or change config
+    if (req.url === '/api/v0/shutdown' || req.url.startsWith('/api/v0/config')) {
       res.end()
       return
     }
