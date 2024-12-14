@@ -303,6 +303,7 @@ const startServer = (port) => {
 
     // don't let plebbit-js call shutdown or change config
     if (req.url === '/api/v0/shutdown' || req.url.startsWith('/api/v0/config')) {
+      res.statusCode = 403
       res.end()
       return
     }
