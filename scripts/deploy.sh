@@ -23,6 +23,7 @@ git clone https://github.com/plebbit/plebbit-uptime-monitor.git
 cd plebbit-uptime-monitor
 git reset HEAD --hard
 git pull
+git log -1
 "
 
 # execute script over ssh
