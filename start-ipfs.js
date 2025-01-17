@@ -253,7 +253,7 @@ const startIpfsAutoRestart = async () => {
     }
     pendingStart = true
     try {
-      const started = await tcpPortUsed.check(5001, '127.0.0.1')
+      const started = await tcpPortUsed.check(ipfsApiPort, '127.0.0.1')
       if (!started) {
         await startIpfs()
       }
