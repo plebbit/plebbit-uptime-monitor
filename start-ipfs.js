@@ -212,7 +212,7 @@ const startIpfs = async () => {
       console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
       reject(Error(lastError))
     })
-    process.on('exit', () => {
+    const tryKill = () => {
       try {
         ps.kill(ipfsProcess.pid)
       } catch (e) {
@@ -224,7 +224,23 @@ const startIpfs = async () => {
       } catch (e) {
         console.log(e)
       }
+    }
+    process.on('exit', () => {
+      tryKill()
     })
+
+    // healthcheck on kubo rpc, sometimes stops working and needs restart, dont know why
+    setInterval(async () => {
+      let res
+      try {
+        res = await fetch(`http://127.0.0.1:${ipfsApiPort}/api/v0/config/show`, {method: 'POST'}).then(res => res.json())
+      }
+      catch (e) {}
+      if (!res?.Identity) {
+        console.log(`kubo rpc healthcheck failed, response '${JSON.stringify(res)}', killing ipfs...`)
+        tryKill()
+      }
+    }, 1000 * 60)
   })
   await startIpfsDaemon()
 }
