@@ -2,7 +2,7 @@ TODO.md
 monitorState.json
 monitorState.json.back*
 history
-.plebbit
+.plebbit*
 stats-telegram-last-message-id
 .ipfs
 .deploy-env

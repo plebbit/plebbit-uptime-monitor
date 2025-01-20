@@ -7,8 +7,8 @@ cd "$(dirname "$0")"
 cd ..
 
 # add env vars
-if [ -f .deploy-env ]; then
-  export $(echo $(cat .deploy-env | sed 's/#.*//g'| xargs) | envsubst)
+if [ -f .deploy-env-ipfs-pubsub ]; then
+  export $(echo $(cat .deploy-env-ipfs-pubsub | sed 's/#.*//g'| xargs) | envsubst)
 fi
 
 # check creds
@@ -17,19 +17,8 @@ if [ -z "${DEPLOY_USER+xxx}" ]; then echo "DEPLOY_USER not set" && exit; fi
 if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit; fi
 
 SCRIPT="
-docker logs --follow --tail 100 plebbit-uptime-monitor
+docker ps
+docker logs plebbit-uptime-monitor-ipfs
 "
 
-# only include logs that contain the filter, e.g. `scripts/logs.sh plebbit-uptime-monitor:subplebbit-pubsub`
-filter="$1"
-if [ -z "$filter" ]; then
-  :
-else
-  SCRIPT="
-docker logs --tail 1000 plebbit-uptime-monitor 2>&1 | grep '$filter'
-"
-  echo $SCRIPT
-fi
-
-# execute script over ssh
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"
