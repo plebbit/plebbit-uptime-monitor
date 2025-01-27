@@ -90,7 +90,7 @@ while (!monitorState.subplebbitsMonitoring) {
   }
 }
 
-const isMonitoring = (name) => argv.only === name || (argv.only?.length || 0) < 1 || argv.only.includes(name)
+const isMonitoring = (name) => argv.only === name || (argv.only?.length || 0) < 1 || argv.only.find?.(name)
 const isMonitoringOnly = (name) => argv.only === name || (argv.only?.length === 1 && argv.only[0] === name)
 
 // fetch subplebbits ipns every 10min
