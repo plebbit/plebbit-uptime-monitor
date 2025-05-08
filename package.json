@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/plebbit/plebbit-uptime-monitor#readme",
   "dependencies": {
-    "@plebbit/plebbit-js": "https://github.com/plebbit/plebbit-js.git#5ff48e9b9a906a098a51b474a52692eebfb6561d",
+    "@plebbit/plebbit-js": "https://github.com/plebbit/plebbit-js.git#a2cb6ca6462b2e2e3b66f71204375a81ed05cf80",
     "cborg": "1.9.6",
     "debug": "4.3.7",
     "decompress": "4.2.1",
@@ -26,7 +26,7 @@
     "http-proxy": "1.18.1",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.4",
-    "ip": "^2.0.1",
+    "ip": "2.0.1",
     "javascript-time-ago": "2.5.10",
     "kubo-rpc-client": "5.0.2",
     "node-fetch": "3.3.2",
