@@ -13,7 +13,7 @@ docker run \
   --volume=$(pwd):/usr/src/plebbit-uptime-monitor \
   --workdir="/usr/src/plebbit-uptime-monitor" \
   --network=host \
-  node:18 \
+  node:20 \
   sh -c "npm install; node start-ipfs"
 
 docker logs --follow plebbit-uptime-monitor-ipfs
