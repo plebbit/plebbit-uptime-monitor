@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/plebbit/plebbit-uptime-monitor#readme",
   "dependencies": {
-    "@plebbit/plebbit-js": "https://github.com/plebbit/plebbit-js.git#a2cb6ca6462b2e2e3b66f71204375a81ed05cf80",
+    "@plebbit/plebbit-js": "https://github.com/plebbit/plebbit-js.git#692ec349f01aa6d8e939ff1d6d07315ab92e4099",
     "cborg": "1.9.6",
     "debug": "4.3.7",
     "decompress": "4.2.1",
