@@ -5,11 +5,11 @@ import {create as createKubo} from 'kubo-rpc-client'
 import {Agent as HttpsAgent} from 'https'
 import {Agent as HttpAgent} from 'http'
 
-const ipfsApiUrl = 'http://127.0.0.1:5001'
+const kuboApiUrl = 'http://127.0.0.1:5001'
 
-const Agent = ipfsApiUrl?.startsWith('https') ? HttpsAgent : HttpAgent
+const Agent = kuboApiUrl?.startsWith('https') ? HttpsAgent : HttpAgent
 const kubo = await createKubo({
-  url: ipfsApiUrl, 
+  url: kuboApiUrl, 
   agent: new Agent({keepAlive: true, maxSockets: Infinity})
 })
 
