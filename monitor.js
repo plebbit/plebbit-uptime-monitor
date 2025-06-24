@@ -23,6 +23,7 @@ import {monitorPlebbitPreviewers} from './lib/plebbit-previewer.js'
 import {monitorChainProviders} from './lib/chain-provider.js'
 import {monitorWebpages} from './lib/webpage.js'
 import {monitorNfts} from './lib/nft.js'
+import {monitorPlebbitSeeders} from './lib/plebbit-seeder.js'
 
 // start server on port 3000
 import './lib/server.js'
@@ -42,6 +43,7 @@ const plebbitPreviewersIntervalMs = 1000 * 60 * 10
 const chainProvidersIntervalMs = 1000 * 60
 const webpagesIntervalMs = 1000 * 60 * 10
 const nftsIntervalMs = 1000 * 60 * 10
+const plebbitSeedersIntervalMs = 1000 * 60 * 10
 
 // fetch subplebbits to monitor every hour
 const multisubs = []
@@ -90,7 +92,7 @@ while (!monitorState.subplebbitsMonitoring) {
   }
 }
 
-const isMonitoring = (name) => argv.only === name || (argv.only?.length || 0) < 1 || argv.only.find?.(name)
+const isMonitoring = (name) => argv.only === name || (argv.only?.length || 0) < 1 || argv.only.find?.(_name => _name === name)
 const isMonitoringOnly = (name) => argv.only === name || (argv.only?.length === 1 && argv.only[0] === name)
 
 // fetch subplebbits ipns every 10min
@@ -153,4 +155,10 @@ if (isMonitoring('webpages')) {
 if (isMonitoring('nfts')) {
   monitorNfts().catch(e => console.log(e.message))
   setInterval(() => monitorNfts().catch(e => console.log(e.message)), nftsIntervalMs)
+}
+
+// fetch plebbit seeders every 10min
+if (isMonitoring('plebbitSeeders')) {
+  monitorPlebbitSeeders().catch(e => console.log(e.message))
+  setInterval(() => monitorPlebbitSeeders().catch(e => console.log(e.message)), plebbitSeedersIntervalMs)
 }
