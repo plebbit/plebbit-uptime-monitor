@@ -131,6 +131,12 @@ if (isMonitoring('httpRouters')) {
   }, isMonitoringOnly('httpRouters') ? 1 : 1000 * 120) // wait to not ddos http routers from monitorSubplebbitsIpns
 }
 
+// fetch plebbit seeders every 10min
+if (isMonitoring('plebbitSeeders')) {
+  monitorPlebbitSeeders().catch(e => console.log(e.message))
+  setInterval(() => monitorPlebbitSeeders().catch(e => console.log(e.message)), plebbitSeedersIntervalMs)
+}
+
 // fetch plebbit previewers every 10min
 if (isMonitoring('plebbitPreviewers')) {
   setTimeout(() => {
@@ -155,10 +161,4 @@ if (isMonitoring('webpages')) {
 if (isMonitoring('nfts')) {
   monitorNfts().catch(e => console.log(e.message))
   setInterval(() => monitorNfts().catch(e => console.log(e.message)), nftsIntervalMs)
-}
-
-// fetch plebbit seeders every 10min
-if (isMonitoring('plebbitSeeders')) {
-  monitorPlebbitSeeders().catch(e => console.log(e.message))
-  setInterval(() => monitorPlebbitSeeders().catch(e => console.log(e.message)), plebbitSeedersIntervalMs)
 }
